@@ -51,6 +51,7 @@ public class PlayerMovement : MonoBehaviour
     void Start()
     {
         cc = GetComponent<CharacterController>();
+        playerAnimator = GetComponent<Animator>();
     }
 
     void Update()
@@ -100,10 +101,12 @@ public class PlayerMovement : MonoBehaviour
 
         CheckInputs();
 
+        FallFlatTest();
+
         if (cc.isGrounded)
         {
-            //movec.y = -1;
-            playerAnimator.SetBool("isJump", false);
+            // movec.y = -1;
+            // playerAnimator.SetBool("isJump", false);
             if (Input.GetKeyDown(KeyCode.Space) || Input.GetKeyDown(KeyCode.UpArrow) || Input.GetKeyDown(KeyCode.W))
             {
 
@@ -138,13 +141,29 @@ public class PlayerMovement : MonoBehaviour
             canmove = false;
             movec.x = sidewayForce;
         }
+
     }
 
-    private void Jump()
+    void FallFlatTest()
+    {
+        if (Input.GetKeyDown(KeyCode.X))
+        {
+            playerAnimator.SetBool("Fall Flat", true);
+        }
+        else
+        {
+            playerAnimator.SetBool("Fall Flat", false);
+        }
+
+    }
+
+   
+
+private void Jump()
     {
         canmove = false;
         movec.y = jumpForce;
-        playerAnimator.SetBool("isJump", true);
+        // playerAnimator.SetBool("isJump", true);
     }
 
     private void OnControllerColliderHit(ControllerColliderHit hit)
