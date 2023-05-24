@@ -6,6 +6,8 @@ TagManager:
   tags:
   - Obstacles
   - Cheese
+  - TestCube
+  - Tree
   layers:
   - Default
   - TransparentFX

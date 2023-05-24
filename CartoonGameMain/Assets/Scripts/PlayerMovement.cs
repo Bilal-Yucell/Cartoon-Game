@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using static UnityEditor.PlayerSettings;
 
 public class PlayerMovement : MonoBehaviour
 {
@@ -47,6 +48,9 @@ public class PlayerMovement : MonoBehaviour
     public float jumpForce = 10f;
     private float gravity = -20f;
 
+    Vector3 posForStand;
+    bool isFalling = false;
+
 
     void Start()
     {
@@ -82,7 +86,7 @@ public class PlayerMovement : MonoBehaviour
                 else if (line == 2 && pos.x < 0)
                 {
 
-                    gameObject.transform.position = new Vector3(-2.5f, pos.y, pos.z);
+                    gameObject.transform.position = new Vector3(0, pos.y, pos.z);
                     line = targetLine;
                     canmove = true;
                     movec.x = 0;
@@ -101,17 +105,16 @@ public class PlayerMovement : MonoBehaviour
 
         CheckInputs();
 
-        FallFlatTest();
-
         if (cc.isGrounded)
         {
             // movec.y = -1;
-            // playerAnimator.SetBool("isJump", false);
-            if (Input.GetKeyDown(KeyCode.Space) || Input.GetKeyDown(KeyCode.UpArrow) || Input.GetKeyDown(KeyCode.W))
+            if (!isFalling)
             {
-
-                Jump();
-                canmove = true;
+                if (Input.GetKeyDown(KeyCode.Space) || Input.GetKeyDown(KeyCode.UpArrow) || Input.GetKeyDown(KeyCode.W))
+                {
+                    Jump();
+                    canmove = true;
+                }
             }
         }
         else
@@ -144,32 +147,56 @@ public class PlayerMovement : MonoBehaviour
 
     }
 
-    void FallFlatTest()
-    {
-        if (Input.GetKeyDown(KeyCode.X))
-        {
-            playerAnimator.SetBool("Fall Flat", true);
-        }
-        else
-        {
-            playerAnimator.SetBool("Fall Flat", false);
-        }
 
+    IEnumerator FallFlat()
+    {
+        canmove = false;
+        playerAnimator.SetBool("Jumping", false);
+        posForStand = gameObject.transform.position;
+        forwardForce = 5;
+        playerAnimator.SetBool("Fall Flating", true);
+        isFalling = true;
+        // Taşa takılınca önce yükkselerek düşsün diye deneme kodu ->gameObject.transform.position = new Vector3(posForStand.x, 5.0f, posForStand.z);
+        yield return new WaitForSeconds(1.0f);
+        forwardForce = 0;
+        yield return new WaitForSeconds(0.65f);
+        playerAnimator.SetBool("Fall Flating", false);
+        playerAnimator.SetBool("Standing", true);
+        // Ayakları yerin içinde görünmesin diye deneme kodu -> gameObject.transform.position = new Vector3(posForStand.x, 1.0f, posForStand.z);
+        yield return new WaitForSeconds(1.65f);
+        playerAnimator.SetBool("Standing", false);
+        // Ayakları yerin içinde görünmesin diye deneme kodu -> gameObject.transform.position = new Vector3(posForStand.x, 0.5f, posForStand.z);
+        forwardForce = 2;
+        yield return new WaitForSeconds(0.5f);
+        forwardForce = 5;
+        yield return new WaitForSeconds(0.5f);
+        forwardForce = 7;
+        yield return new WaitForSeconds(0.5f);
+        forwardForce = 10;
+        yield return new WaitForSeconds(0.5f);
+        forwardForce = 13;
+        yield return new WaitForSeconds(0.5f);
+        forwardForce = 17;
+        yield return new WaitForSeconds(0.5f);
+        forwardForce = 20;
+
+        canmove = true;
+
+        // playerAnimator.SetBool("Fast Run", true);
     }
 
-   
-
-private void Jump()
+    private void Jump()
     {
         canmove = false;
         movec.y = jumpForce;
-        // playerAnimator.SetBool("isJump", true);
+        playerAnimator.SetBool("Jumping", true);
     }
 
     private void OnControllerColliderHit(ControllerColliderHit hit)
     {
         if (hit.gameObject.CompareTag("Obstacles"))
         {
+            StartCoroutine(FallFlat());
             Can -= 1;
             if (Can == 0)
             {
@@ -178,7 +205,7 @@ private void Jump()
                 playerAnimator.enabled = false;
                 AudioManager.SetActive(false);
                 cheeseAnimator.enabled = false;
-                transitionAnimator.SetTrigger("GoToMenu");
+                // transitionAnimator.SetTrigger("GoToMenu");
             }
 
             Destroy(hit.gameObject);
